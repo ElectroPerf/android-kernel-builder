@@ -7,7 +7,7 @@ from pathlib import Path
 from shutil import copyfile, rmtree, make_archive
 from stat import S_IWRITE
 
-ANYKERNEL3_REMOTE = "https://github.com/osm0sis/AnyKernel3"
+ANYKERNEL3_REMOTE = "https://github.com/ElectroPerf/AnyKernel3"
 
 AK3_CONFIG = """\
 # AnyKernel3 Ramdisk Mod Script
