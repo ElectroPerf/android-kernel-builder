@@ -1,31 +1,46 @@
+from argparse import ArgumentParser
+from build_kernel import out_path
 from build_kernel.utils.ak3 import AK3Manager
 from build_kernel.utils.cc import Make
-from build_kernel.utils.config import load_config_module
+from build_kernel.utils.device import devices
 from build_kernel.utils.info import print_summary
-from logging import info
-from pathlib import Path
+from build_kernel.utils.logging import LOGE, LOGI
 
-def main(config_path: Path, clean=False):
-	config = load_config_module(config_path)
-	make = Make(config)
+def main():
+	parser = ArgumentParser(prog='python3 -m kernel_build')
 
-	print_summary(config)
+	parser.add_argument("device", type=str,
+						help="device codename")
+	parser.add_argument("-c", "--clean", action='store_true',
+						help="clean before building")
+	parser.add_argument("-v", "--verbose", action='store_true',
+						help="verbose logging")
 
-	(config.out_path / "KERNEL_OBJ").mkdir(exist_ok=True, parents=True)
+	args = parser.parse_args()
 
-	if clean is True:
-		info("Cleaning before building")
+	if not args.device in devices:
+		LOGE(f"Device {args.device} not found")
+		LOGI("Available devices:\n" + "\n".join(devices.keys()))
+		return
+
+	device = devices[args.device]
+	make = Make(device)
+
+	print_summary(device)
+
+	if args.clean is True:
+		LOGI("Cleaning before building")
 		make.run("clean")
 		make.run("mrproper")
 
-	info("Building defconfig")
-	make.run(config.defconfig)
+	LOGI("Building defconfig")
+	make.run(device.TARGET_KERNEL_CONFIG)
 
-	info("Building kernel")
+	LOGI("Building kernel")
 	make.run()
 
-	info("Creating AnyKernel3 zip")
-	ak3manager = AK3Manager(config)
+	LOGI("Creating AnyKernel3 zip")
+	ak3manager = AK3Manager(device)
 	zip_filename = ak3manager.create_ak3_zip()
 
-	info(f"Build completed successfully: {zip_filename}")
+	LOGI(f"Build completed successfully: {zip_filename}")

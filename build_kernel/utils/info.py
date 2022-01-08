@@ -1,22 +1,15 @@
-from build_kernel import get_config
-from build_kernel.utils.config import Config
+from build_kernel import get_config, kernel_path, out_path
+from build_kernel.utils.device import Device
 
-TEXT = """\
-============================================
-Linux kernel version={config.kernel_version}
-Architecture={config.arch}
-Sources directory={config.kernel_path}
-Output directory={out_path}
-Build user={build_user}
-Build machine={build_host}
-Toolchain={config.toolchain}
-ccache enabled={ccache}
-============================================
-"""
-
-def print_summary(config: Config):
-	text = TEXT.format(config=config, out_path=config.out_path,
-					   build_user=get_config("KBUILD_BUILD_USER"),
-					   build_host=get_config("KBUILD_BUILD_HOST"),
-					   ccache=get_config("ENABLE_CCACHE"))
-	print(text)
+def print_summary(device: Device):
+	print("\n".join([
+		"============================================",
+		f"PRODUCT_DEVICE={device.PRODUCT_DEVICE}",
+		f"TARGET_ARCH={device.TARGET_ARCH}",
+		f"TARGET_KERNEL_SOURCE={kernel_path / device.TARGET_KERNEL_SOURCE}",
+		f"OUT_DIR={out_path / device.PRODUCT_DEVICE}",
+		f"BUILD_USER={get_config('KBUILD_BUILD_USER')}",
+		f"BUILD_HOST={get_config('KBUILD_BUILD_HOST')}",
+		f"CCACHE={get_config('ENABLE_CCACHE')}",
+		"============================================",
+	]))
